@@ -1,3 +1,6 @@
+#https://www.pingshiuanchua.com/blog/post/collecting-analysing-google-home-reviews-with-python
+#https://www.pingshiuanchua.com/blog/category/python/web-scraping/
+
 import urllib
 import requests
 from fake_useragent import UserAgent
