@@ -43,7 +43,8 @@ def scrape(url, lang='ALL'):
     session.headers.update({
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0',
     })
-
+ 1              !/  ##
+ 
 
     items = parse(session, url + '?filterLang=' + lang)
 
@@ -59,8 +60,8 @@ def parse(session, url):
     if not soup:
         print('[parse] no soup:', url)
         return
-
-    num_reviews = soup.find('span', class_='hotels-hotel-review-atf-info-parts-Rating__reviewCount--1sk1X').text # get text
+    # hotels-hotel-review-atf-info-parts-Rating__reviewCount--1sk1X
+    num_reviews = soup.find('span', class_='reviewCount styleguide-bubble-rating-BubbleRatingWithReviewCount__reviewCount--37tMc').text # get text
     #num_reviews = num_reviews[1:-1] 
     num_reviews = num_reviews.replace(',', '')
     #num_reviews = int(num_reviews) # convert text into integer
@@ -99,8 +100,10 @@ def get_reviews_ids(soup):
         return reviews_ids
     
 def get_more(session, reviews_ids):
+    # https://www.tripadvisor.com/OverlayWidgetAjax?Mode=EXPANDED_HOTEL_REVIEWS_RESP&metaReferer=Hotel_Review
+    #https://www.tripadvisor.com/OverlayWidgetAjax?Mode=EXPANDED_Attraction_REVIEWS_RESP&metaReferer=Hotel_Review
 
-    url = 'https://www.tripadvisor.com/OverlayWidgetAjax?Mode=EXPANDED_HOTEL_REVIEWS_RESP&metaReferer=Hotel_Review'
+    url = 'https://www.tripadvisor.co.uk/Attraction_Review-g186525-d2042818-Reviews-or5-Viajar_Por_Escocia_Tours_en_Espanol-Edinburgh_Scotland.html#REVIEWS'
 
     payload = {
         'reviews': ','.join(reviews_ids), # ie. "577882734,577547902,577300887",
@@ -194,8 +197,11 @@ def write_in_csv(items, filename='results.csv',
 DB_COLUMN   = 'review_body'
 DB_COLUMN1 = 'review_date'
 
+
+# https://www.tripadvisor.ca/Hotel_Review-g60982-d87016-Reviews-Hilton_Hawaiian_Village_Waikiki_Beach_Resort-Honolulu_Oahu_Hawaii.html
+
 start_urls = [
-    'https://www.tripadvisor.ca/Hotel_Review-g60982-d87016-Reviews-Hilton_Hawaiian_Village_Waikiki_Beach_Resort-Honolulu_Oahu_Hawaii.html',
+    'https://www.tripadvisor.co.uk/Attraction_Review-g186525-d2042818-Reviews-Viajar_Por_Escocia_Tours_en_Espanol-Edinburgh_Scotland.html',
 ]
 
 lang = 'en'
