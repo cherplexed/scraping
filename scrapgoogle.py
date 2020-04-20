@@ -15,6 +15,8 @@ import requests
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import numpy as np
+import re
+import csv   
 
 
 def reviewCounter(soup, url):
@@ -47,9 +49,9 @@ url_reviews = "https://www.tripadvisor.co.uk/AttractionProductReview-g186525-d19
 string_to_search = "-or"
 number_reviews = int(number_reviews)
 # we force the value to scrap the reviews as the number showed in TA is the addition between TA and viator.
-number_reviews = 10
+number_reviews = 5
 reviews_integer = int((number_reviews) / (5))
-print(reviews_integer)
+print("number of loops", reviews_integer)
 list = range(0, (reviews_integer))
 url_to_call = []
 for l in list:
@@ -60,11 +62,10 @@ for l in list:
 
 # we generate one soap per page
 
-    review_value = []
-    date = []
-    writer = []
-    title = []
-    description = []
+# array to get all the elements
+a = []
+header = ["review-value", "review-date", "review-writer", "review-title", "review-description"]
+a.append(header)
 for url in url_to_call:
     response = requests.get(url, {"User-Agent": ua.random})
     soup = BeautifulSoup(response.text, "lxml")
@@ -72,67 +73,59 @@ for url in url_to_call:
     # All the information per review
     result_div = soup.find_all('div', {"class": "location-review-card-Card__ui_card--2Mri0 location-review-card-Card__card--o3LVm location-review-card-Card__section--NiAcw"})
     result_div = soup.find_all('div', {"class": "_1T1U92WJ"})
+    values_to_numpy = []
     for r in result_div:
         try:
+            print("inside")
+            value_to_pass = 0
+            aux = ""
+            writer_review = ""
+            review_tittle = ""
+            review_description = ""
             # stars value; html generated does not show the result of the review. we compare the class value to know the numeric review value
             value_to_compare = (r.find('div', {'class': '_2cyNVhH_'}))
             new_value = str(value_to_compare.find('span'))
             if (new_value.find("2vB__cbb") != -1):
-                review_value.append(5)
+                value_to_pass = 5
             elif(new_value.find("1-HtLqs3") != -1):
-                review_value.append(4)
+                value_to_pass = 4
             else:
-                review_value.append(3)
-            #datereview
+                value_to_pass = 3
+            
+            # datereview
             aux = r.find('div', attrs={'class': '_3mCNwHy0'}).get_text()
-            aux = aux[int(aux.find("review"))+7:]
-            date.append(aux)
+            aux = aux[int(aux.find("review")) + 7:]
+            
             # shows revewer + date of review
-            writer.append(r.find('a', attrs={'class': '_1e-v2VZJ _3I1Aup9d'}).get_text())
+            writer_review = r.find('a', attrs={'class': '_1e-v2VZJ _3I1Aup9d'}).get_text()
+            writer.append(writer_review)
+            
             # review title
-            title.append(r.find('a', attrs={'class': '_1xr4qUQI'}).get_text())
+            review_tittle = r.find('a', attrs={'class': '_1xr4qUQI'}).get_text()
+            
             # review text
-            # check if review fishines with 3 dots. In that case remove last sentence until previous dot
+            # check if review finishes with 3 dots. In that case remove last sentence until previous dot
             review_description = r.find('div', attrs={'class': 'cPQsENeY'}).get_text()
-            review_description[:]
-            review_description = 
-            description.append()
+            end_dot = review_description.find('...')
+            if end_dot != -1:
+                review_description = review_description[:len(review_description) - 3]
+                previous_ending_dot = review_description.rfind(".")
+                review_description = review_description[:previous_ending_dot]
+            else:
+                description.append(review_description)
+            
             # add all values in one array
-            np.Array([review_value[-1], date[-1],writer[-1], title[-1], description[-1]])
+            print(value_to_pass)
+            print(aux)
+            print(writer_review)
+            print(review_tittle)
+            print(review_description)
+            values_to_numpy = [value_to_pass, aux, writer_review, review_tittle, review_description]
+            print(values_to_numpy)
+            a.append(values_to_numpy)
         except:
             continue
-
-for rv in review_value:
-    print(rv)
-     
-for d in date:
-    print(d)
-   
-for wr in writer:
-     print(wr)
-   
-for t in title:
-     print(t)
-
-for d in description:
-     print(d)
- 
-# import re   
-# 
-# 
-# to_remove = []
-# clean_links = []
-# for i, l in enumerate(links):
-#     clean = re.search('\/url\?q\=(.*)\&sa',l)
-#     if clean is None:
-#         to_remove.append(i)
-#         continue
-#     clean_links.append(clean.group(1))
-#     
-# for x in to_remove:
-#     del titles[x]
-#     del descriptions[x]
-#     
+print(a)
 
 # SPANISH TAGS WORKING
 # for r in result_div:
