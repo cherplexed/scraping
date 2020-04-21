@@ -16,7 +16,7 @@ from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import numpy as np
 import re
-import csv   
+import csv
 
 
 def reviewCounter(soup, url):
@@ -49,7 +49,7 @@ url_reviews = "https://www.tripadvisor.co.uk/AttractionProductReview-g186525-d19
 string_to_search = "-or"
 number_reviews = int(number_reviews)
 # we force the value to scrap the reviews as the number showed in TA is the addition between TA and viator.
-number_reviews = 5
+#number_reviews = 5
 reviews_integer = int((number_reviews) / (5))
 print("number of loops", reviews_integer)
 list = range(0, (reviews_integer))
@@ -61,11 +61,10 @@ for l in list:
         url_to_call.append(url_reviews.replace(string_to_search, string_to_search + str(l * 5)))
 
 # we generate one soap per page
-
 # array to get all the elements
 a = []
-header = ["review-value", "review-date", "review-writer", "review-title", "review-description"]
-a.append(header)
+# header = ["review-value", "review-date", "review-writer", "review-title", "review-description"]
+# a.append(header)
 for url in url_to_call:
     response = requests.get(url, {"User-Agent": ua.random})
     soup = BeautifulSoup(response.text, "lxml")
@@ -74,14 +73,13 @@ for url in url_to_call:
     result_div = soup.find_all('div', {"class": "location-review-card-Card__ui_card--2Mri0 location-review-card-Card__card--o3LVm location-review-card-Card__section--NiAcw"})
     result_div = soup.find_all('div', {"class": "_1T1U92WJ"})
     values_to_numpy = []
+    value_to_pass = 0
+    aux = ""
+    writer_review = ""
+    review_tittle = ""
+    review_description = ""
     for r in result_div:
         try:
-            print("inside")
-            value_to_pass = 0
-            aux = ""
-            writer_review = ""
-            review_tittle = ""
-            review_description = ""
             # stars value; html generated does not show the result of the review. we compare the class value to know the numeric review value
             value_to_compare = (r.find('div', {'class': '_2cyNVhH_'}))
             new_value = str(value_to_compare.find('span'))
@@ -91,18 +89,13 @@ for url in url_to_call:
                 value_to_pass = 4
             else:
                 value_to_pass = 3
-            
             # datereview
             aux = r.find('div', attrs={'class': '_3mCNwHy0'}).get_text()
             aux = aux[int(aux.find("review")) + 7:]
-            
-            # shows revewer + date of review
+            # shows reviewer + date of review
             writer_review = r.find('a', attrs={'class': '_1e-v2VZJ _3I1Aup9d'}).get_text()
-            writer.append(writer_review)
-            
             # review title
             review_tittle = r.find('a', attrs={'class': '_1xr4qUQI'}).get_text()
-            
             # review text
             # check if review finishes with 3 dots. In that case remove last sentence until previous dot
             review_description = r.find('div', attrs={'class': 'cPQsENeY'}).get_text()
@@ -110,22 +103,21 @@ for url in url_to_call:
             if end_dot != -1:
                 review_description = review_description[:len(review_description) - 3]
                 previous_ending_dot = review_description.rfind(".")
-                review_description = review_description[:previous_ending_dot]
-            else:
-                description.append(review_description)
-            
+                review_description = review_description[:previous_ending_dot]            
             # add all values in one array
-            print(value_to_pass)
-            print(aux)
-            print(writer_review)
-            print(review_tittle)
-            print(review_description)
             values_to_numpy = [value_to_pass, aux, writer_review, review_tittle, review_description]
-            print(values_to_numpy)
             a.append(values_to_numpy)
         except:
             continue
-print(a)
+
+# for each in a:
+#     for each2 in each:
+#         print(each2)
+
+# create csv file with reviews
+with open('reviewsTA.csv', 'w', newline='', encoding='UTF-8') as f:
+    writer = csv.writer(f, delimiter=',')
+    writer.writerows(a)
 
 # SPANISH TAGS WORKING
 # for r in result_div:
